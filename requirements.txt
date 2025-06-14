@@ -4,3 +4,4 @@ pandas
 ta
 pybit
 matplotlib
+flask
