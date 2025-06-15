@@ -12,7 +12,7 @@ from ta.trend import EMAIndicator, MACD
 from ta.momentum import RSIIndicator, StochRSIIndicator
 from ta.volatility import AverageTrueRange, BollingerBands
 from pybit.unified_trading import HTTP
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from queue import Queue
 import matplotlib
 matplotlib.use('Agg')
@@ -160,8 +160,7 @@ def analyze_symbol(symbol, tf):
         swing = sdf.close.iloc[-1] if not sdf.empty else sniper
 
         msg = (
-            f"📊 **BYBIT FUTURES**\n"
-            f"📈 {signal.upper()} Signal\n"
+            f"📊 <b>BYBIT FUTURES</b>\n"
             f"<b>{signal} Signal</b>\n"
             f"Symbol: <code>{symbol}</code>\n"
             f"TF: <code>{tf}</code> | Price: <code>{sniper:.6f}</code>\n"
@@ -196,7 +195,7 @@ def job():
     time.sleep(BATCH_SLEEP)
 
 # === ENTRY POINT ===
-def main():
+def run_bot():
     init_db()
     time.sleep(1)
     global symbols
@@ -212,4 +211,4 @@ def main():
         logging.error("No symbols fetched, exiting")
 
 if __name__ == "__main__":
-    main()
+    run_bot()
