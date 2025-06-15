@@ -1,7 +1,8 @@
-requests
-schedule
 pandas
-ta
-pybit
 matplotlib
+schedule
 flask
+ta
+requests
+pybit
+
