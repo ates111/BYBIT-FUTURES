@@ -5,6 +5,8 @@ pytz
 pandas
 schedule
 flask
+ta
+
 
 
 
