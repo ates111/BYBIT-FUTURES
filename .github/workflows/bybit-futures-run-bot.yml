@@ -1,24 +1,27 @@
-name: Run Bybit Futures Bot Every 5 Hours
+name: Run Crypto Bot
 
 on:
+  push:
+    branches: [main]
   schedule:
-    - cron: '0 */5 * * *'   # Setiap 5 jam sekali
-  workflow_dispatch:         # Bisa dijalankan manual juga dari GitHub
+    - cron: "*/30 * * * *"  # setiap 30 menit
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
 
-      - name: Install Dependencies
-        run: pip install -r requirements.txt
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-      - name: Run Bot
-        run: python BYBIT_FUTURES.py
+    - name: Run bot
+      run: python run.py
