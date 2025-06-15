@@ -1,4 +1,4 @@
-import bybit_futures
+import BYBIT_FUTURES
 
 if __name__ == "__main__":
     BYBIT_FUTURES.run_bot()
