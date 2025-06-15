@@ -58,7 +58,7 @@ def telegram_worker():
 
 def send_telegram(message):
     url = f"https://api.telegram.org/bot{tg_token}/sendMessage"
-    payload = {"chat_id": tg_id, "text": message, "parse_mode": "HTML"}
+    payload = {"chat_id": tg_id, "text": message, "parse_mode": "Markdown"}
     try:
         print("[TELEGRAM]", datetime.now(), "->", message.splitlines()[0])
         res = requests.post(url, data=payload, timeout=10)
@@ -150,7 +150,7 @@ def analyze_symbol(symbol, tf):
         tahan = "–"
         if latest.ema20 >= latest.ema50:
             if latest.rsi < 50: tahan = "📆 Potensi 1–2 Hari"
-            elif latest.rsi < 70: tahan = "📆 HOLD 1–3 Hari"
+            elif latest.rsi < 70: tahan = "📆 Disarankan HOLD 1–3 Hari"
             else: tahan = "⚠️ Trend lemah"
         else:
             tahan = "⏳ Tidak disarankan ditahan"
@@ -160,19 +160,24 @@ def analyze_symbol(symbol, tf):
         swing = sdf.close.iloc[-1] if not sdf.empty else sniper
 
         msg = (
-            f"📊 <b>BYBIT FUTURES</b>\n"
-            f"<b>{signal} Signal</b>\n"
-            f"Symbol: <code>{symbol}</code>\n"
-            f"TF: <code>{tf}</code> | Price: <code>{sniper:.6f}</code>\n"
-            f"EMA20: <code>{latest.ema20:.6f}</code> | EMA50: <code>{latest.ema50:.6f}</code>\n"
-            f"Bollinger: <code>{latest.bb_lower:.6f} - {latest.bb_upper:.6f}</code>\n"
-            f"RSI: <code>{latest.rsi:.2f}</code> | StochRSI: <code>{latest.stochrsi:.2f}</code>\n"
-            f"MACD: <code>{latest.macd:.6f}</code> | ATR: <code>{latest.atr:.6f}</code>\n"
-            f"Candle: {candle}\n"
-            f"🎯 Sniper: <code>{sniper:.6f}</code> | 🔁 Swing: <code>{swing:.6f}</code>\n"
+            f"📊 *BYBIT FUTURES*\n"
+            f"{signal} Signal\n"
+            f"Symbol: `{symbol}`\n"
+            f"Timeframe: {tf}\n"
+            f"Price: {sniper:.4f}\n"
+            f"EMA20: {latest.ema20:.4f}\n"
+            f"EMA50: {latest.ema50:.4f}\n"
+            f"Bollinger Bands: {latest.bb_lower:.4f} - {latest.bb_upper:.4f}\n"
+            f"RSI: {latest.rsi:.2f}\n"
+            f"StochRSI: {latest.stochrsi:.2f}\n"
+            f"MACD: {latest.macd:.4f}\n"
+            f"ATR: {latest.atr:.4f}\n"
+            f"Candlestick: {candle}\n"
+            f"🎯 Masuk di harga (sniper): {sniper:.4f} [TF {tf}]\n"
+            f"🔁 Masuk di harga (swing): {swing:.4f} [TF 4h]\n"
             f"{tahan}\n"
-            f"🕒 {latest.timestamp}\n"
-            f"✅ Valid by RSIbantaiBot @ {datetime.now():%Y-%m-%d %H:%M:%S}"
+            f"🕒 Time: {latest.timestamp.strftime('%Y-%m-%d %H:%M:%S')}\n"
+            f"✅ Valid by RSIbantaiBot @ {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         )
         message_queue.put(msg)
 
