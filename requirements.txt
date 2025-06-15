@@ -1,13 +1,13 @@
-ccxt
-requests
-websocket-client
-pytz
-pandas
-schedule
-flask
-ta
-pybit
-matplotlib
+ccxt==3.0.89
+requests==2.31.0
+websocket-client==1.6.1
+pytz==2023.3
+pandas==2.2.2
+schedule==1.2.1
+flask==3.0.3
+ta==0.11.0
+pybit==5.7.0
+matplotlib==3.8.4
 
 
 
