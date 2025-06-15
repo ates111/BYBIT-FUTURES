@@ -60,6 +60,7 @@ def send_telegram(message):
     url = f"https://api.telegram.org/bot{tg_token}/sendMessage"
     payload = {"chat_id": tg_id, "text": message, "parse_mode": "HTML"}
     try:
+        print("Mengirim pesan ke Telegram pada:", datetime.now())  # Tambahan ini
         response = requests.post(url, data=payload, timeout=10)
         if response.status_code == 429:
             retry_after = response.json().get("parameters", {}).get("retry_after", 5)
@@ -70,6 +71,7 @@ def send_telegram(message):
             logging.error("Telegram Error: %s", response.text)
     except Exception as e:
         logging.error("Telegram Exception: %s", e)
+
 
 # === DATABASE ===
 def init_db():
