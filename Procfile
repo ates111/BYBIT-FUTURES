@@ -1,2 +1,2 @@
-worker: #python fair_futures.py
+#worker: python fair_futures.py
 
