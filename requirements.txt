@@ -3,6 +3,6 @@ requests
 websocket-client
 pytz
 pandas
-
+schedule
 
 
