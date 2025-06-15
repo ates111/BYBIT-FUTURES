@@ -1,8 +1,8 @@
-pandas
-matplotlib
-schedule
-flask
-ta
+ccxt
 requests
-pybit
+websocket-client
+pytz
+pandas
+
+
 
