@@ -1,2 +1,2 @@
-#worker: python bybit_futures.py
+worker: python BYBIT_FUTURES.py
 
