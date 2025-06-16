@@ -1,17 +1,16 @@
-name: Bybit Futures Bot
+name: Run Bybit Futures Bot
 
 on:
   push:
     branches: [main]
-  schedule:
-    - cron: '*/15 * * * *'  # Setiap 15 menit
+  workflow_dispatch:
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
+    - name: Checkout Repo
       uses: actions/checkout@v3
 
     - name: Set up Python
@@ -20,12 +19,9 @@ jobs:
         python-version: '3.10'
 
     - name: Install dependencies
-      run: pip install -r requirements.txt
+      run: |
+        pip install -r requirements.txt
 
-    - name: Run bot
-      env:
-        BYBIT_API_KEY: ${{ secrets.BYBIT_API_KEY }}
-        BYBIT_API_SECRET: ${{ secrets.BYBIT_API_SECRET }}
-        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-      run: python run.py
+    - name: Run the bot
+      run: |
+        python bybit_futures.py
