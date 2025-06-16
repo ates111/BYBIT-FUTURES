@@ -1,5 +1,4 @@
-# FINAL VERSION: Bebas dari pemblokiran API Bybit & Telegram (rate limit mitigation)
-
+# bybit_futures.py — FINAL SYNC VERSION
 import os
 import time
 import sqlite3
@@ -20,24 +19,24 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-# === CONFIG ===
+# === KONFIGURASI ===
 api_key = os.getenv("BYBIT_API_KEY", "R4Nv7r38iigntfHjYe")
 api_secret = os.getenv("BYBIT_API_SECRET", "aeK29VCgC6dKJrUuvouHAlPSKtzAzSqauUPz")
 tg_token = os.getenv("TG_TOKEN", "8153894385:AAFa4kbNHTlDkJ0Fq2BWFk-jyZ0k9rxbk5k")
 tg_id = os.getenv("TG_CHAT_ID", "7153166439")
+
 category = "linear"
 timeframes = ["1m", "5m", "15m", "30m", "1h"]
 MAX_SYMBOLS = 100
-BATCH_SLEEP = 2
 MAX_WORKERS = 10
-interval_map = {"30s": "0.5", "1m": "1", "5m": "5", "15m": "15", "30m": "30", "1h": "60", "4h": "240", "6h": "360", "1d": "D"}
+BATCH_SLEEP = 2
+interval_map = {"30s": "0.5", "1m": "1", "5m": "5", "15m": "15", "30m": "30", "1h": "60", "4h": "240", "1d": "D"}
 
-# === INIT ===
+# === INISIALISASI ===
 session = HTTP(api_key=api_key, api_secret=api_secret)
 app = Flask(__name__)
 symbols = []
 message_queue = Queue()
-MAX_MESSAGES_PER_SECOND = 0.5  # Jangan lebih dari 1 untuk hindari blok
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.WARNING)
 
@@ -49,8 +48,8 @@ def telegram_worker():
             try:
                 send_telegram(msg)
             except Exception as e:
-                logging.error("[Telegram] Failed: %s", e)
-            time.sleep(2.5)  # Rate limit protection (max 20 msg/50s)
+                logging.error("[Telegram] Gagal kirim: %s", e)
+            time.sleep(2.5)
         else:
             time.sleep(0.1)
 
@@ -60,7 +59,7 @@ def send_telegram(message):
     res = requests.post(url, data=payload, timeout=10)
     if res.status_code == 429:
         retry = res.json().get("parameters", {}).get("retry_after", 5)
-        logging.warning(f"[RATE LIMIT] Telegram retry after {retry}s")
+        logging.warning(f"[Telegram RATE LIMIT] retry after {retry}s")
         time.sleep(retry + 1)
         message_queue.put(message)
     elif res.status_code != 200:
@@ -79,30 +78,30 @@ def init_db():
         )''')
         conn.commit()
 
-# === SYMBOL FETCH ===
+# === AMBIL SYMBOL ===
 def fetch_symbols():
     try:
         resp = session.get_instruments_info(category=category)
-        lst = resp.get("result", {}).get("list", []) or []
-        return [i["symbol"] for i in lst if "USDT" in i["symbol"]][:MAX_SYMBOLS]
+        data = resp.get("result", {}).get("list", []) or []
+        return [item["symbol"] for item in data if "USDT" in item["symbol"]][:MAX_SYMBOLS]
     except Exception as e:
-        logging.error("[SYMBOL] Fetch error: %s", e)
+        logging.error("[Fetch Symbol] Gagal: %s", e)
         return []
 
 # === OHLCV ===
 def fetch_ohlcv(symbol, interval, limit=200):
-    for attempt in range(3):
+    for i in range(3):
         try:
             res = session.get_kline(category=category, symbol=symbol, interval=interval, limit=limit)
             df = pd.DataFrame(res["result"]["list"], columns=["timestamp", "open", "high", "low", "close", "volume", "turnover"])
             df["timestamp"] = pd.to_datetime(df["timestamp"].astype(int), unit='ms')
             return df.astype(float).sort_values("timestamp")
         except Exception as e:
-            logging.warning(f"[{symbol}] OHLCV Error ({attempt+1}/3): {e}")
-            time.sleep(1 + attempt)
+            logging.warning(f"[{symbol}] OHLCV Error ({i+1}/3): {e}")
+            time.sleep(1 + i)
     return pd.DataFrame()
 
-# === CANDLE ===
+# === POLA CANDLE ===
 def detect_candlestick_pattern(df):
     last = df.iloc[-1]
     body = abs(last.close - last.open)
@@ -112,7 +111,7 @@ def detect_candlestick_pattern(df):
     if upper > 2 * body and lower < body: return "⭐ Shooting Star"
     return "–"
 
-# === STRATEGI ===
+# === ANALISIS ===
 def analyze_symbol(symbol, tf):
     df = fetch_ohlcv(symbol, interval_map.get(tf))
     if df.empty or len(df) < 50: return
@@ -178,7 +177,7 @@ def analyze_symbol(symbol, tf):
     except Exception as e:
         logging.error(f"[{symbol} {tf}] Error: {e}")
 
-# === JOB ===
+# === JOB SCHEDULER ===
 def job():
     if not symbols: return
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as ex:
@@ -187,7 +186,7 @@ def job():
                 ex.submit(analyze_symbol, sym, tf)
     time.sleep(BATCH_SLEEP)
 
-# === RUN ===
+# === MAIN RUN ===
 def run_bot():
     init_db()
     time.sleep(1)
@@ -203,6 +202,5 @@ def run_bot():
     else:
         logging.error("No symbols fetched, exiting")
 
-# === ENTRY POINT ===
 if __name__ == "__main__":
     run_bot()
