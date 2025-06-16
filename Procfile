@@ -1,1 +1,2 @@
-worker: python run-bot.py
+worker: python bybit_futures.py
+
