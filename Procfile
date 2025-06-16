@@ -1,2 +1,1 @@
-worker: python BYBIT_FUTURES.py
-
+worker: python run-bot.py
