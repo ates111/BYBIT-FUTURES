@@ -8,5 +8,7 @@ Sinyal dikirim ke Telegram secara real-time.
 
 ## 🚀 Cara Menjalankan (Manual)
 
+1. Install dependencies:
+
 ```bash
-python bybit_futures.py
+pip install -r requirements.txt
